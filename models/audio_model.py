@@ -2,93 +2,66 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Reshape
+from models.our_loss import *
+
 
 class AudioModel(tf.keras.Model):
     def __init__(self):
         super(AudioModel, self).__init__()
 
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
-        self.batch_size = 20
-        self.num_epochs = 50
+        self.batch_size = 128
+        self.num_epochs = 10
         self.num_classes = 4
 
+        input_shape = (60,300,6)
+
         self.cnn = Sequential()
-        self.cnn.add(tf.keras.layers.Conv2D(20, kernel_size =(6, 6), strides =(2, 2),activation ='relu',kernel_regularizer=tf.keras.regularizers.L2(l2=0.0000001)))
+
+        self.cnn.add(tf.keras.layers.Conv2D(20, kernel_size =(6, 6),input_shape=input_shape ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
         self.cnn.add(tf.keras.layers.BatchNormalization())
-        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2),strides=(2, 2), padding='valid'))
-        self.cnn.add(tf.keras.layers.Conv2D(40, kernel_size =(5, 5), strides =(2, 2),activation ='relu',kernel_regularizer=tf.keras.regularizers.L2(l2=0.0000001)))
+        self.cnn.add(tf.keras.layers.ReLU())
+        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3)))
+
+        self.cnn.add(tf.keras.layers.Conv2D(40, kernel_size =(5, 5), padding ='same',kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
         self.cnn.add(tf.keras.layers.BatchNormalization())
-        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2),strides=(2, 2), padding='valid'))
+        self.cnn.add(tf.keras.layers.ReLU())
+        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3)))
+
+        self.cnn.add(tf.keras.layers.Conv2D(80, kernel_size =(4, 4), padding ='same',kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
+        self.cnn.add(tf.keras.layers.BatchNormalization())
+        self.cnn.add(tf.keras.layers.ReLU())
+        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3)))
 
         self.cnn.add(Flatten())
-        self.cnn.add(tf.keras.layers.Dense(16 ,activation='relu'))
+        self.cnn.add(tf.keras.layers.Dense(32 ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
+        self.cnn.add(tf.keras.layers.BatchNormalization())
+        self.cnn.add(tf.keras.layers.ReLU())
+        self.cnn.add(tf.keras.layers.Dense(16 ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
+        self.cnn.add(tf.keras.layers.BatchNormalization())
+        self.cnn.add(tf.keras.layers.ReLU())
         self.cnn.add(tf.keras.layers.Dropout(.6))
 
-        self.cnn.add( tf.keras.layers.Dense(4 ,activation='softmax'))
+        print(self.cnn.summary())
+
+
+        self.vec2veclayer = tf.keras.layers.Dense(2, activation="tanh")
+        self.softmax_layer = tf.keras.layers.Dense(4, activation="softmax")
 
 
     def call(self, input):
         out = self.cnn(input)
-        return out, out
+
+        vec2vec = self.vec2veclayer (out)
+        probs = self.softmax_layer(out)
+
+
+
+        return probs, vec2vec
 
     def loss(self, logits, labels,two_d_vectorspace):
 
-        #
-        # loss_2d_space =0
-        # for i in range(self.batch_size):
-        #     label= labels[i]
-        #     vector =two_d_vectorspace[i]
-        #     if(label[0]==1):
-        #         #relaxed bottom right
-        #         if(vector[0]<0 and vector[1]<0  ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[0])
-        #
-        #         if(vector[0]<0 and vector[1]>0 ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[0]+vector[1])
-        #
-        #         if(vector[0]> 0and vector[1]>0  ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[1])
-        #     if(label[1]==1):
-        #         #happy top right
-        #         if(vector[0]<0 and vector[1]<0  ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[0]+vector[1])
-        #
-        #         if(vector[0]<0 and vector[1]>0 ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[0])
-        #
-        #         if(vector[0]> 0and vector[1]<0  ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[1])
-        #
-        #     if(label[2]==1):
-        #         #angry top left
-        #         if(vector[0]<0 and vector[1]<0  ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[1])
-        #
-        #         if(vector[0]>0 and vector[1]<0 ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[0]+vector[1])
-        #
-        #         if(vector[0]>0 and vector[1]>0  ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[0])
-        #
-        #
-        #     if(label[3]==1):
-        #         #sad bottom left
-        #         if(vector[0]>0 and vector[1]<0  ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[0])
-        #
-        #         if(vector[0]<0 and vector[1]>0 ):
-        #             loss_2d_space=loss_2d_space+tf.math.square(vector[1])
-        #
-        #         if(vector[0]>0 and vector[1]>0  ):
-        #             loss_2d_space=loss_2d_space+tf.math.square( vector[0]+vector[1])
-        #
-        #
-        #
-        #
-        # loss_2d_space/=self.batch_size
-
-
-        #return tf.keras.losses.CategoricalCrossentropy(labels)
+        C = our_loss( labels,two_d_vectorspace, self.batch_size)
         my_loss = tf.keras.losses.CategoricalCrossentropy()
         loss_cross_entropy =my_loss(labels,logits)
 

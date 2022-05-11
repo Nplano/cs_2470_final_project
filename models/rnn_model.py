@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+from models.our_loss import *
 
 class RNN(tf.keras.Model):
     def __init__(self, vocab_size, max_sentence_size):
@@ -25,6 +26,8 @@ class RNN(tf.keras.Model):
         self.denseLayer_3 = tf.keras.layers.Dense(64, activation="relu")
         self.dropoutLayer_3 = tf.keras.layers.Dropout(0.2)
         self.denseLayer_4 = tf.keras.layers.Dense(4, activation="softmax")
+
+
 
 
     @tf.function

@@ -8,6 +8,9 @@ from preprocessing.audio import *
 from models.audio_model import AudioModel
 from models.rnn_model import *
 from models.combined_model import *
+import librosa
+import librosa.display
+import matplotlib.pyplot as plt
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
@@ -37,6 +40,7 @@ def run_audio_model():
     training_lyrics_ids, testing_lyrics_ids, vocab, lyric_missing_indices, pad_token_ind = get_lyric_data("data/lyrics.txt")
     one_hot_labels_training,one_hot_labels_testing, data_train,data_test= audio_process_data(one_hot_labels,lyric_missing_indices)
     model = AudioModel()
+
     model.train(one_hot_labels_training,data_train)
 
     acc= model.test(one_hot_labels_testing,data_test)
@@ -47,7 +51,7 @@ def run_audio_model():
     acc_train = model.test( one_hot_labels_training,data_train)
     print("train accuracy ")
     print(acc_train)
-
+    #
 
 def run_lyrics_model():
     training_lyrics_ids, testing_lyrics_ids, vocab, lyric_missing_indices, pad_token_ind = get_lyric_data("data/lyrics.txt")
