@@ -3,11 +3,9 @@ import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Flatten, Reshape
 
-
-
-class audio_model(tf.keras.Model):
+class AudioModel(tf.keras.Model):
     def __init__(self):
-        super(audio_model, self).__init__()
+        super(AudioModel, self).__init__()
 
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
         self.batch_size = 20

@@ -1,11 +1,11 @@
 import numpy as np
 import tensorflow as tf
-from audio_model import audio_model
+from audio_model import AudioModel
 from rnn_model import *
 
-class Combine_model(tf.keras.Model):
+class CombinedModel(tf.keras.Model):
     def __init__(self, rnn_model, audio_model):
-        super(Combine_model, self).__init__()
+        super(CombinedModel, self).__init__()
 
         self.rnn_model =rnn_model
         self.audio_model = audio_model
@@ -23,8 +23,6 @@ class Combine_model(tf.keras.Model):
         self.denseLayer_3 = tf.keras.layers.Dense(64, activation="relu")
         self.dropoutLayer_3 = tf.keras.layers.Dropout(0.2)
         self.denseLayer_4 = tf.keras.layers.Dense(4, activation="softmax")
-
-
 
 
     @tf.function
@@ -54,7 +52,7 @@ class Combine_model(tf.keras.Model):
         return loss
 
 
-def train_combine(model,  rnn_inputs, audio_inputs,labels):
+def train_combine(model, rnn_inputs, audio_inputs,labels):
 
     for epoch in range(model.epochs):
         print("epoch = ", epoch)
@@ -83,7 +81,6 @@ def train_combine(model,  rnn_inputs, audio_inputs,labels):
 
             gradients = tape.gradient(loss, model.trainable_variables)
             model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-    pass
 
     #return test_rnn(model,  rnn_inputs, labels,spectrograph,chromograph,tempograph,rms_energy)
 
@@ -91,7 +88,6 @@ def test_combine(model,  rnn_inputs, audio_inputs,labels):
     batch_size = model.batch_size
     batch_num = rnn_inputs.shape[0] // batch_size
     acc_sum = 0
-
 
     for i in range(batch_num):
         rnn_inputs_test = rnn_inputs[i * batch_size: (i + 1) * batch_size]

@@ -1,26 +1,22 @@
+import os
 import numpy as np
-#import tensorflow as tf
+import tensorflow as tf
+from numpy import load
 from preprocessing.labels import get_labels
 from preprocessing.lyrics import *
 from preprocessing.audio import *
-from numpy import load
-from audio_model import audio_model
-from rnn_model import *
-from combine_model import *
-import tensorflow as tf
-from matplotlib import pyplot as plt
+from models.audio_model import audio_model
+from models.rnn_model import *
+from models.combined_model import *
 
-import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-
-
 
 def main():
     # uncomment to run the two sub-models
     run_audio_model()
     #print(f"MAX_SENTENCE_SIZE={MAX_SENTENCE_SIZE}")
     #run_lyrics_model()
-    #run_combied()
+    #run_combined()
 
 
     # training_lyrics_ids, testing_lyrics_ids, vocab, lyric_missing_indices, pad_token_ind = get_lyric_data("data/lyrics.txt")
@@ -53,8 +49,6 @@ def run_audio_model():
     print(acc_train)
 
 
-
-
 def run_lyrics_model():
     training_lyrics_ids, testing_lyrics_ids, vocab, lyric_missing_indices, pad_token_ind = get_lyric_data("data/lyrics.txt")
     one_hot_labels = get_labels('data/moods.txt')
@@ -69,7 +63,7 @@ def run_lyrics_model():
     print("test acc", acc_test)
 
 
-def run_combied():
+def run_combined():
     training_lyrics_ids, testing_lyrics_ids, vocab, lyric_missing_indices, pad_token_ind = get_lyric_data("data/lyrics.txt")
     one_hot_labels = get_labels('data/moods.txt')
     rnn_model = RNN(len(vocab), MAX_SENTENCE_SIZE)

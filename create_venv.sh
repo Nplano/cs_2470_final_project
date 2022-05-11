@@ -1,14 +1,18 @@
 #!/bin/bash
 
-# this installs the virtualenv module
+# install virtualenv module
 python3 -m pip install virtualenv
-# this creates a virtual environment named "env"
+
+# create virtual environment named "env"
 virtualenv -p python3 env
-# this activates the created virtual environment
+
+# activate new virtual environment
 source env/bin/activate
-# updates pip
-pip install -U pip
-# this installs the required python packages to the virtual environment
+
+# update pip
+pip install -U pip 
+
+# install required python packages to the virtual environment
 pip install -r requirements.txt
 
-echo created environment
+echo DL project environment created!
