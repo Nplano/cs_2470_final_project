@@ -96,7 +96,7 @@ def get_audio_features(song_directory):
             print("Shape of data:", np.shape(data))
 
     data = np.asarray(data)
-    save('data/numpy/audio_features.npy', data)
+    save('data/numpy/data.npy', data)
 
 
 def audio_process_data(one_hot_labels, missing_indices):
@@ -114,7 +114,7 @@ def audio_process_data(one_hot_labels, missing_indices):
     one_hot_labels_training = one_hot_labels[0:num_training]
     one_hot_labels_testing = one_hot_labels[num_training:num_examples]
 
-    data = load('data/numpy/audio_features.npy')
+    data = load('data/numpy/data.npy')
     data = np.delete(data, missing_indices, axis=0)
     data_training = data[0:num_training]
     data_testing = data[num_training:num_examples]

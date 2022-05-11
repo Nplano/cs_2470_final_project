@@ -12,8 +12,6 @@ class AudioModel(tf.keras.Model):
         self.num_epochs = 50
         self.num_classes = 4
 
-
-
         self.cnn = Sequential()
         self.cnn.add(tf.keras.layers.Conv2D(20, kernel_size =(6, 6), strides =(2, 2),activation ='relu',kernel_regularizer=tf.keras.regularizers.L2(l2=0.0000001)))
         self.cnn.add(tf.keras.layers.BatchNormalization())
@@ -30,15 +28,10 @@ class AudioModel(tf.keras.Model):
 
 
     def call(self, input):
-
-
         out = self.cnn(input)
+        return out, out
 
-
-
-        return out ,out
-
-    def loss(self, logits, labels,two_d_vectorspace  ):
+    def loss(self, logits, labels,two_d_vectorspace):
 
         #
         # loss_2d_space =0

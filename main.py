@@ -5,7 +5,7 @@ from numpy import load
 from preprocessing.labels import get_labels
 from preprocessing.lyrics import *
 from preprocessing.audio import *
-from models.audio_model import audio_model
+from models.audio_model import AudioModel
 from models.rnn_model import *
 from models.combined_model import *
 
@@ -36,15 +36,15 @@ def run_audio_model():
     one_hot_labels = get_labels('data/moods.txt')
     training_lyrics_ids, testing_lyrics_ids, vocab, lyric_missing_indices, pad_token_ind = get_lyric_data("data/lyrics.txt")
     one_hot_labels_training,one_hot_labels_testing, data_train,data_test= audio_process_data(one_hot_labels,lyric_missing_indices)
-    model = audio_model()
-    model.train( one_hot_labels_training,data_train)
+    model = AudioModel()
+    model.train(one_hot_labels_training,data_train)
 
     acc= model.test(one_hot_labels_testing,data_test)
 
     print("test accuracy ")
     print(acc)
 
-    acc_train =model.test( one_hot_labels_training,data_train)
+    acc_train = model.test( one_hot_labels_training,data_train)
     print("train accuracy ")
     print(acc_train)
 
@@ -73,17 +73,16 @@ def run_combined():
     train_rnn(rnn_model, training_lyrics_ids, training_labels)
 
     one_hot_labels = get_labels('data/moods.txt')
-    one_hot_labels_training,one_hot_labels_testing, data_train,data_test= audio_process_data(one_hot_labels,lyric_missing_indices)
-    model_audio = audio_model()
+    one_hot_labels_training,one_hot_labels_testing, data_train,data_test = audio_process_data(one_hot_labels, lyric_missing_indices)
+    model_audio = AudioModel()
     #train audio
-    model_audio.train( one_hot_labels_training,data_train)
+    model_audio.train(one_hot_labels_training, data_train)
 
-
-    combined_model = Combine_model(rnn_model, model_audio)
+    combined_model = CombinedModel(rnn_model, model_audio)
 
     #train combined model
-    train_combine(combined_model,  training_lyrics_ids,data_train,one_hot_labels_training )
-    acc= test_combine(combined_model,  testing_lyrics_ids,data_test,one_hot_labels_testing )
+    train_combine(combined_model, training_lyrics_ids,data_train,one_hot_labels_training )
+    acc = test_combine(combined_model, testing_lyrics_ids,data_test,one_hot_labels_testing )
     print("combined model acc")
     print(acc)
 

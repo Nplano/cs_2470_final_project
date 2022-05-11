@@ -1,5 +1,6 @@
-from collections import defaultdict
 import numpy as np
+from collections import defaultdict
+
 
 PAD_TOKEN = "*PAD*"
 STOP_TOKEN = "*STOP*"

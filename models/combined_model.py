@@ -1,13 +1,13 @@
 import numpy as np
 import tensorflow as tf
-from audio_model import AudioModel
-from rnn_model import *
+from models.audio_model import AudioModel
+from models.rnn_model import *
 
 class CombinedModel(tf.keras.Model):
     def __init__(self, rnn_model, audio_model):
         super(CombinedModel, self).__init__()
 
-        self.rnn_model =rnn_model
+        self.rnn_model = rnn_model
         self.audio_model = audio_model
 
         self.epochs = 30
@@ -71,7 +71,7 @@ def train_combine(model, rnn_inputs, audio_inputs,labels):
             audio_inputs_train_batch = shuffled_audio_inputs[i * batch_size: (i + 1) * batch_size]
 
             probs_rnn =model.rnn_model.call(rnn_train_batch)
-            probs_audio,test =model.audio_model.call(audio_inputs_train_batch )
+            probs_audio,test = model.audio_model.call(audio_inputs_train_batch )
             print(np.shape(probs_rnn))
             print(np.shape(probs_audio))
             with tf.GradientTape() as tape:
