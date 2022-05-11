@@ -6,37 +6,41 @@ from models.our_loss import *
 
 
 class AudioModel(tf.keras.Model):
-    def __init__(self):
+    def __init__(self, with_loss):
         super(AudioModel, self).__init__()
 
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
         self.batch_size = 128
-        self.num_epochs = 10
+        self.num_epochs = 3
         self.num_classes = 4
+        self.with_loss = with_loss
 
         input_shape = (60,300,6)
 
         self.cnn = Sequential()
 
         self.cnn.add(tf.keras.layers.Conv2D(20, kernel_size =(6, 6),input_shape=input_shape ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
-        self.cnn.add(tf.keras.layers.BatchNormalization())
+        #self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.ReLU())
-        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3)))
+        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
         self.cnn.add(tf.keras.layers.Conv2D(40, kernel_size =(5, 5), padding ='same',kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
-        self.cnn.add(tf.keras.layers.BatchNormalization())
+    #    self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.ReLU())
-        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3)))
+        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
         self.cnn.add(tf.keras.layers.Conv2D(80, kernel_size =(4, 4), padding ='same',kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
         self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.ReLU())
-        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(3, 3)))
+        self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+
 
         self.cnn.add(Flatten())
-        self.cnn.add(tf.keras.layers.Dense(32 ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
+        self.cnn.add(tf.keras.layers.Dense(64 ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
         self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.ReLU())
+        self.cnn.add(tf.keras.layers.Dropout(.6))
         self.cnn.add(tf.keras.layers.Dense(16 ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
         self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.ReLU())
@@ -63,9 +67,11 @@ class AudioModel(tf.keras.Model):
 
         C = our_loss( labels,two_d_vectorspace, self.batch_size)
         my_loss = tf.keras.losses.CategoricalCrossentropy()
-        loss_cross_entropy =my_loss(labels,logits)
+        loss =my_loss(labels,logits)
+        if(self.with_loss==True):
+            loss = loss +C
 
-        return loss_cross_entropy
+        return loss
 
 
 
@@ -78,11 +84,14 @@ class AudioModel(tf.keras.Model):
 
         return tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
 
-    def train(self, labels,inputs):
+    def train(self, labels,inputs, test_inputs,test_labels):
 
 
         num_examples = len(inputs)
         num_batches = int(num_examples/self.batch_size)
+        train_acc =[]
+        test_acc =[]
+        epoch = []
 
         for epochs in range(self.num_epochs):
             print(epochs)
@@ -105,6 +114,10 @@ class AudioModel(tf.keras.Model):
 
                 gradients = tape.gradient(loss,self.trainable_variables)
                 self.optimizer.apply_gradients(zip(gradients,self.trainable_variables))
+            train_acc.append(self.test(labels, inputs))
+            test_acc.append(self.test(test_labels, test_inputs))
+            epoch.append(epochs)
+        return train_acc,test_acc,epoch
 
 
     def test(self,labels,inputs):

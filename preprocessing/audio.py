@@ -102,12 +102,17 @@ def get_audio_features(song_directory):
             out = np.dstack((tempogram_interp,mfcc_interp,chromagramm_interp,spectrograph_interp,spectral_contrast_interp,tonnetz_contrast_interp))
             out = np.reshape(out, (60,300,6))
 
-            data.append(out)
+
+
+
+
+
+
 
             print("Shape of data:", np.shape(data))
 
     data = np.asarray(data)
-    save('data.npy', data)
+    save('data/numpy/data.npy', data)
 
 
 def audio_process_data(one_hot_labels, missing_indices):

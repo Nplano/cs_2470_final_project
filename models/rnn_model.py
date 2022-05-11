@@ -3,14 +3,16 @@ import tensorflow as tf
 from models.our_loss import *
 
 class RNN(tf.keras.Model):
-    def __init__(self, vocab_size, max_sentence_size):
+    def __init__(self, vocab_size, max_sentence_size, with_loss):
         super(RNN, self).__init__()
         self.vocab_size = vocab_size
         self.max_sentence_size = max_sentence_size
 
         self.word_embedding_size = 128
         self.hidden_state_size = 256
-        self.epochs = 30
+        self.epochs = 10
+
+        self.with_loss = with_loss
 
         self.batch_size = 128
         self.learning_rate = 0.0005
@@ -25,7 +27,9 @@ class RNN(tf.keras.Model):
         self.dropoutLayer_2 = tf.keras.layers.Dropout(0.2)
         self.denseLayer_3 = tf.keras.layers.Dense(64, activation="relu")
         self.dropoutLayer_3 = tf.keras.layers.Dropout(0.2)
-        self.denseLayer_4 = tf.keras.layers.Dense(4, activation="softmax")
+
+        self.vec2veclayer = tf.keras.layers.Dense(2, activation="tanh")
+        self.softmax_layer = tf.keras.layers.Dense(4, activation="softmax")
 
 
 
@@ -40,8 +44,10 @@ class RNN(tf.keras.Model):
         output = self.dropoutLayer_2(output)
         output = self.denseLayer_3(output)
         output = self.dropoutLayer_3(output)
-        probs = self.denseLayer_4(output)
-        return probs
+        probs = self.softmax_layer(output)
+        vec2vec = self.vec2veclayer(output)
+
+        return probs,vec2vec
 
     def accuracy_function(self, probs, labels):
         predictions = tf.argmax(input=probs, axis=1)
@@ -49,13 +55,20 @@ class RNN(tf.keras.Model):
         accuracy = tf.reduce_mean(tf.cast(tf.equal(predictions, labels), tf.float32))
         return accuracy
 
-    def loss_function(self, probs, labels):
+    def loss_function(self, probs, labels,two_d_vectorspace):
         cce = tf.keras.losses.CategoricalCrossentropy()
+
+        C = our_loss( labels,two_d_vectorspace, self.batch_size)
         loss = cce(labels, probs)
+        if(self.with_loss==True):
+            loss = loss +C
         return loss
 
 
-def train_rnn(model, inputs, labels):
+def train_rnn(model, inputs, labels, test_inputs,test_labels):
+    train_acc =[]
+    test_acc =[]
+    epochd = []
     for epoch in range(model.epochs):
         print("epoch = ", epoch)
         indices = np.arange(len(inputs))
@@ -69,14 +82,18 @@ def train_rnn(model, inputs, labels):
             train_batch = inputs_shuffled[i * batch_size: (i + 1) * batch_size]
             labels_batch = labels_shuffled[i * batch_size: (i + 1) * batch_size]
             with tf.GradientTape() as tape:
-                probs = model.call(train_batch)
-                loss = model.loss_function(probs, labels_batch)
+                probs,vec2vec = model.call(train_batch)
+                loss = model.loss_function(probs, labels_batch,vec2vec)
                 print("loss = ", loss.numpy())
 
             gradients = tape.gradient(loss, model.trainable_variables)
             model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-    return test_rnn(model, inputs, labels)
+        train_acc.append(test_rnn(model, inputs, labels))
+        test_acc.append(test_rnn(model, test_inputs, test_labels))
+        epochd.append(epoch)
+
+    return train_acc,test_acc,epochd
 
 def test_rnn(model, inputs, labels):
     batch_size = model.batch_size
@@ -85,7 +102,7 @@ def test_rnn(model, inputs, labels):
     for i in range(batch_num):
         test_batch = inputs[i * batch_size: (i + 1) * batch_size]
         labels_batch = labels[i * batch_size: (i + 1) * batch_size]
-        probs_batch = model.call(test_batch)
+        probs_batch, vec2vex = model.call(test_batch)
         acc_sum += model.accuracy_function(probs_batch, labels_batch)
 
     return acc_sum / batch_num
