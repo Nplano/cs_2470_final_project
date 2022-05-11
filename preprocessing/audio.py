@@ -137,7 +137,7 @@ def audio_process_data(one_hot_labels,missing_indices):
 
 
 def main():
-    get_audio_features('../all_2595')
+    get_audio_features('data/all_2595/')
 
 
 if __name__ == '__main__':
