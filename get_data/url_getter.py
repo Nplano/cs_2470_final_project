@@ -1,9 +1,9 @@
-import subprocess
 import time
 import json
+import subprocess
 from urllib.parse import quote
 
-f = open("sheet.tsv")
+f = open("data/sheet.tsv")
 
 API_KEYS = [
     "AIzaSyDVS6Bq6bGg0_UFWp5BikwERUB_Yr6mkg8",

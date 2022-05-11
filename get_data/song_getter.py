@@ -1,14 +1,14 @@
-import subprocess
 import os
 import argparse
+import subprocess
 
 parser = argparse.ArgumentParser()
 parser.add_argument("start", metavar = "start", type = int)
 parser.add_argument("end", metavar = "end", type = int)
 args = parser.parse_args()
 
-f = open("/Users/breesesherman/Documents/school/brown/course/cs2470/final/urls.txt")
-existing_songs = os.listdir("/Users/breesesherman/Documents/school/brown/course/cs2470/final/songs/")
+f = open("get_data/urls.txt")
+existing_songs = os.listdir("data/all_2595/")
 
 i = 1
 
@@ -45,7 +45,7 @@ while True:
             "7",
             "-c",
             "copy",
-            "/Users/breesesherman/Documents/school/brown/course/cs2470/final/songs/" + zfill(i) + ".wav",
+            "data/all_2595/" + zfill(i) + ".wav",
         ])
         subprocess.run([
             "rm",

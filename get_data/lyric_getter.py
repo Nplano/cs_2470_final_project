@@ -4,7 +4,7 @@ import re
 import time
 from bs4 import BeautifulSoup
 
-f = open("../data/sheet.tsv")
+f = open("data/sheet.tsv")
 
 i = 0
 
@@ -31,7 +31,7 @@ def kebab_caser(s : str, capitalize_first = True):
 while True:
     line = f.readline()
     if not line: break
-    o = open("output.txt", "a")
+    o = open("data/lyrics.txt", "a")
     line_ = line.rstrip().split('\t')
     artist = line_[0]
     title = line_[1]

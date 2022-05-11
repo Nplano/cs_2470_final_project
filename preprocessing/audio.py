@@ -1,28 +1,15 @@
 
 import librosa
-# pip install librosa //this command to get this llibarar
 import librosa.display
-
-#from matplotlib import pyplot as plt
 import numpy as np
+from numpy import save, load
 
-from numpy import asarray
-from numpy import save
-
-# load numpy array from npy file
-from numpy import load
 
 def int_to_str_4digts(val):
-
-    string= str(val)
-    while( len(string)<4):
+    string = str(val)
+    while len(string) < 4:
         string = '0'+string
-
     return string
-
-
-
-
 
 
 def get_audio_features(song_directory):
@@ -34,9 +21,9 @@ def get_audio_features(song_directory):
     # 4.  rms_energys  dimensions -> [number of songs,timestep]
     num_songs=2595
     hop_length = 512
-    min=154624
+    sample_length = 154624
 
-    data=[]
+    data = []
 
     for i in range(1,num_songs+1):
 
@@ -46,9 +33,6 @@ def get_audio_features(song_directory):
             path = song_directory+'/'+int_to_str_4digts(i)+'.wav'
             x_t, sr = librosa.load(path)
             x_t = x_t[0:154624]
-
-
-
 
             S, phase = librosa.magphase(librosa.stft(x_t))
             rms = librosa.feature.rms(S=S)
@@ -114,7 +98,6 @@ def get_audio_features(song_directory):
     data = np.asarray(data)
 
     save('data.npy', data)
-
 
     pass
 
