@@ -73,7 +73,9 @@ def train_combine(model,  rnn_inputs, audio_inputs,labels):
             audio_inputs_train_batch = shuffled_audio_inputs[i * batch_size: (i + 1) * batch_size]
 
             probs_rnn =model.rnn_model.call(rnn_train_batch)
-            probs_audio =model.audio_model.call(audio_inputs_train_batch )
+            probs_audio,test =model.audio_model.call(audio_inputs_train_batch )
+            print(np.shape(probs_rnn))
+            print(np.shape(probs_audio))
             with tf.GradientTape() as tape:
                 probs = model.call(probs_rnn,probs_audio)
                 loss = model.loss_function(probs, labels_batch)
@@ -87,7 +89,7 @@ def train_combine(model,  rnn_inputs, audio_inputs,labels):
 
 def test_combine(model,  rnn_inputs, audio_inputs,labels):
     batch_size = model.batch_size
-    batch_num = inputs.shape[0] // batch_size
+    batch_num = rnn_inputs.shape[0] // batch_size
     acc_sum = 0
 
 
@@ -96,7 +98,7 @@ def test_combine(model,  rnn_inputs, audio_inputs,labels):
         labels_batch = labels[i * batch_size: (i + 1) * batch_size]
         audio_inputs_test = audio_inputs[i * batch_size: (i + 1) * batch_size]
         probs_rnn =model.rnn_model.call(rnn_inputs_test)
-        probs_audio =model.audio_model.call( spectrograph_test, tempograph_test,chromograph_test,rms_trarms_energy_testin_batch)
+        probs_audio,test =model.audio_model.call(audio_inputs_test )
         probs_batch = model.call(probs_rnn,probs_audio)
         acc_sum += model.accuracy_function(probs_batch, labels_batch)
 

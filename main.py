@@ -17,10 +17,10 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 def main():
     # uncomment to run the two sub-models
-    #run_audio_model()
+    run_audio_model()
     #print(f"MAX_SENTENCE_SIZE={MAX_SENTENCE_SIZE}")
     #run_lyrics_model()
-    run_combied()
+    #run_combied()
 
 
     # training_lyrics_ids, testing_lyrics_ids, vocab, lyric_missing_indices, pad_token_ind = get_lyric_data("data/lyrics.txt")
@@ -89,7 +89,9 @@ def run_combied():
 
     #train combined model
     train_combine(combined_model,  training_lyrics_ids,data_train,one_hot_labels_training )
-    test_combine(combined_model,  training_lyrics_ids,data_train,one_hot_labels_training )
+    acc= test_combine(combined_model,  testing_lyrics_ids,data_test,one_hot_labels_testing )
+    print("combined model acc")
+    print(acc)
 
 if __name__ == '__main__':
     main()

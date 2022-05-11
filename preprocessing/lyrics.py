@@ -119,7 +119,7 @@ def get_lyric_data(lyrics_text_file):
     lyrics_ids = convert_to_id(vocab, sentences)
 
     # 80% go to training set and 20% go to testing set
-    training_size = int(lyrics_ids.shape[0] * 0.8)
+    training_size = int(lyrics_ids.shape[0] * 0.80)
     training_lyrics_ids = lyrics_ids[:training_size]
     testing_lyrics_ids = lyrics_ids[training_size:]
 
@@ -129,7 +129,7 @@ def get_lyric_data(lyrics_text_file):
 def lyric_labels_process(one_hot_labels, lyric_missing_indices):
     one_hot_labels = np.delete(one_hot_labels, lyric_missing_indices, axis=0)
 
-    training_size = int(one_hot_labels.shape[0] * 0.8)
+    training_size = int(one_hot_labels.shape[0] * 0.80)
     training_labels = one_hot_labels[:training_size]
     testing_labels = one_hot_labels[training_size:]
     return training_labels, testing_labels

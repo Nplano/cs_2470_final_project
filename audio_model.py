@@ -9,22 +9,23 @@ class audio_model(tf.keras.Model):
     def __init__(self):
         super(audio_model, self).__init__()
 
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
-        self.batch_size = 128
-        self.num_epochs = 1
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
+        self.batch_size = 20
+        self.num_epochs = 50
         self.num_classes = 4
 
 
 
         self.cnn = Sequential()
         self.cnn.add(tf.keras.layers.Conv2D(20, kernel_size =(6, 6), strides =(2, 2),activation ='relu',kernel_regularizer=tf.keras.regularizers.L2(l2=0.0000001)))
+        self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2),strides=(2, 2), padding='valid'))
         self.cnn.add(tf.keras.layers.Conv2D(40, kernel_size =(5, 5), strides =(2, 2),activation ='relu',kernel_regularizer=tf.keras.regularizers.L2(l2=0.0000001)))
+        self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2),strides=(2, 2), padding='valid'))
-        # self.cnn.add(tf.keras.layers.Conv2D(20, kernel_size =(4, 4), strides =(2, 2),activation ='relu'))
-        # self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2),strides=(2, 2), padding='valid'))
+
         self.cnn.add(Flatten())
-        self.cnn.add( tf.keras.layers.Dense(16 ,activation='relu'))
+        self.cnn.add(tf.keras.layers.Dense(16 ,activation='relu'))
         self.cnn.add(tf.keras.layers.Dropout(.6))
 
         self.cnn.add( tf.keras.layers.Dense(4 ,activation='softmax'))

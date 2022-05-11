@@ -9,7 +9,7 @@ class RNN(tf.keras.Model):
 
         self.word_embedding_size = 128
         self.hidden_state_size = 256
-        self.epochs = 1
+        self.epochs = 30
 
         self.batch_size = 128
         self.learning_rate = 0.0005
