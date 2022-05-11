@@ -1,9 +1,9 @@
-__pycache__
+__pycache__/
+all_2595/
+.ipynb_checkpoints/
+.vscode/
 .DS_Store
 *.ipynb
 *.npy
-all_2595/
 *.zip
-lyrics-OLD.txt
-lyrics-NEW.txt
 
