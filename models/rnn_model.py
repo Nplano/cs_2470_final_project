@@ -10,7 +10,7 @@ class RNN(tf.keras.Model):
 
         self.word_embedding_size = 128
         self.hidden_state_size = 256
-        self.epochs = 10
+        self.epochs = 30
 
         self.with_loss = with_loss
 
@@ -27,8 +27,8 @@ class RNN(tf.keras.Model):
         self.dropoutLayer_2 = tf.keras.layers.Dropout(0.2)
         self.denseLayer_3 = tf.keras.layers.Dense(64, activation="relu")
         self.dropoutLayer_3 = tf.keras.layers.Dropout(0.2)
-
-        self.vec2veclayer = tf.keras.layers.Dense(2, activation="tanh")
+        if(self.with_loss==True):
+            self.vec2veclayer = tf.keras.layers.Dense(2, activation="tanh")
         self.softmax_layer = tf.keras.layers.Dense(4, activation="softmax")
 
 
@@ -45,9 +45,10 @@ class RNN(tf.keras.Model):
         output = self.denseLayer_3(output)
         output = self.dropoutLayer_3(output)
         probs = self.softmax_layer(output)
-        vec2vec = self.vec2veclayer(output)
-
-        return probs,vec2vec
+        if(self.with_loss==True):
+            vec2vec = self.vec2veclayer(output)
+            return probs,vec2vec
+        return probs,probs
 
     def accuracy_function(self, probs, labels):
         predictions = tf.argmax(input=probs, axis=1)

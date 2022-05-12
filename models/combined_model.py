@@ -16,13 +16,9 @@ class CombinedModel(tf.keras.Model):
         self.learning_rate = 0.0005
         self.optimizer = tf.optimizers.Adam(learning_rate=self.learning_rate)
 
-        self.denseLayer_1 = tf.keras.layers.Dense(256, activation="relu")
+        self.denseLayer_1 = tf.keras.layers.Dense(16, activation="relu")
         self.dropoutLayer_1 = tf.keras.layers.Dropout(0.2)
-        self.denseLayer_2 = tf.keras.layers.Dense(128, activation="relu")
-        self.dropoutLayer_2 = tf.keras.layers.Dropout(0.2)
-        self.denseLayer_3 = tf.keras.layers.Dense(64, activation="relu")
-        self.dropoutLayer_3 = tf.keras.layers.Dropout(0.2)
-        self.denseLayer_4 = tf.keras.layers.Dense(4, activation="softmax")
+        self.denseLayer_2 = tf.keras.layers.Dense(4, activation="softmax")
 
 
     @tf.function
@@ -33,11 +29,8 @@ class CombinedModel(tf.keras.Model):
         combined = tf.concat([probs_rnn,probs_audio],1)
         output = self.denseLayer_1(combined)
         output = self.dropoutLayer_1(output)
-        output = self.denseLayer_2(output)
-        output = self.dropoutLayer_2(output)
-        output = self.denseLayer_3(output)
-        output = self.dropoutLayer_3(output)
-        probs = self.denseLayer_4(output)
+        probs = self.denseLayer_2(output)
+
         return probs
 
     def accuracy_function(self, probs, labels):
@@ -52,7 +45,12 @@ class CombinedModel(tf.keras.Model):
         return loss
 
 
-def train_combine(model, rnn_inputs, audio_inputs,labels):
+def train_combine(model, rnn_inputs, audio_inputs,labels,test_rnn_inputs,test_audio_inputs,test_labels):
+
+
+    train_acc =[]
+    test_acc =[]
+    epoch_data = []
 
     for epoch in range(model.epochs):
         print("epoch = ", epoch)
@@ -70,8 +68,8 @@ def train_combine(model, rnn_inputs, audio_inputs,labels):
             labels_batch = labels_shuffled[i * batch_size: (i + 1) * batch_size]
             audio_inputs_train_batch = shuffled_audio_inputs[i * batch_size: (i + 1) * batch_size]
 
-            probs_rnn =model.rnn_model.call(rnn_train_batch)
-            probs_audio,test = model.audio_model.call(audio_inputs_train_batch )
+            probs_rnn,vec =model.rnn_model.call(rnn_train_batch)
+            probs_audio,vec = model.audio_model.call(audio_inputs_train_batch )
             print(np.shape(probs_rnn))
             print(np.shape(probs_audio))
             with tf.GradientTape() as tape:
@@ -81,6 +79,12 @@ def train_combine(model, rnn_inputs, audio_inputs,labels):
 
             gradients = tape.gradient(loss, model.trainable_variables)
             model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+        train_acc.append(test_combine(model, rnn_inputs,audio_inputs, labels))
+        test_acc.append(test_combine(model, test_rnn_inputs,test_audio_inputs, test_labels))
+        epoch_data.append(epoch)
+
+    return train_acc,test_acc,epoch
 
     #return test_rnn(model,  rnn_inputs, labels,spectrograph,chromograph,tempograph,rms_energy)
 
@@ -93,7 +97,7 @@ def test_combine(model,  rnn_inputs, audio_inputs,labels):
         rnn_inputs_test = rnn_inputs[i * batch_size: (i + 1) * batch_size]
         labels_batch = labels[i * batch_size: (i + 1) * batch_size]
         audio_inputs_test = audio_inputs[i * batch_size: (i + 1) * batch_size]
-        probs_rnn =model.rnn_model.call(rnn_inputs_test)
+        probs_rnn,vec =model.rnn_model.call(rnn_inputs_test)
         probs_audio,test =model.audio_model.call(audio_inputs_test )
         probs_batch = model.call(probs_rnn,probs_audio)
         acc_sum += model.accuracy_function(probs_batch, labels_batch)

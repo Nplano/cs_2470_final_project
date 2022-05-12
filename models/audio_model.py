@@ -6,30 +6,32 @@ from models.our_loss import *
 
 
 class AudioModel(tf.keras.Model):
-    def __init__(self, with_loss):
+    def __init__(self, with_loss, without_tempo):
         super(AudioModel, self).__init__()
 
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
         self.batch_size = 128
-        self.num_epochs = 3
+        self.num_epochs = 30
         self.num_classes = 4
         self.with_loss = with_loss
-
+        self.without_tempo =without_tempo
         input_shape = (60,300,6)
+        if(without_tempo==True):
+            input_shape = (60,300,5)
 
         self.cnn = Sequential()
 
-        self.cnn.add(tf.keras.layers.Conv2D(20, kernel_size =(6, 6),input_shape=input_shape ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
+        self.cnn.add(tf.keras.layers.Conv2D(20, kernel_size =(6, 6),input_shape=input_shape ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.0000001)))
         #self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.ReLU())
         self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
-        self.cnn.add(tf.keras.layers.Conv2D(40, kernel_size =(5, 5), padding ='same',kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
+        self.cnn.add(tf.keras.layers.Conv2D(40, kernel_size =(5, 5), padding ='same',kernel_regularizer=tf.keras.regularizers.L2(l2=0.0000001)))
     #    self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.ReLU())
         self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
-        self.cnn.add(tf.keras.layers.Conv2D(80, kernel_size =(4, 4), padding ='same',kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
+        self.cnn.add(tf.keras.layers.Conv2D(80, kernel_size =(4, 4), padding ='same',kernel_regularizer=tf.keras.regularizers.L2(l2=0.0000001)))
         self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.ReLU())
         self.cnn.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
@@ -37,31 +39,37 @@ class AudioModel(tf.keras.Model):
 
 
         self.cnn.add(Flatten())
-        self.cnn.add(tf.keras.layers.Dense(64 ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
+        self.cnn.add(tf.keras.layers.Dense(64 ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.0000001)))
         self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.ReLU())
         self.cnn.add(tf.keras.layers.Dropout(.6))
-        self.cnn.add(tf.keras.layers.Dense(16 ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.00001)))
+        self.cnn.add(tf.keras.layers.Dense(16 ,kernel_regularizer=tf.keras.regularizers.L2(l2=0.000001)))
         self.cnn.add(tf.keras.layers.BatchNormalization())
         self.cnn.add(tf.keras.layers.ReLU())
         self.cnn.add(tf.keras.layers.Dropout(.6))
+        self.softmax_layer = tf.keras.layers.Dense(4, activation="softmax")
 
         print(self.cnn.summary())
 
+        if(self.with_loss==True):
+            self.vec2veclayer = tf.keras.layers.Dense(2, activation="tanh")
 
-        self.vec2veclayer = tf.keras.layers.Dense(2, activation="tanh")
-        self.softmax_layer = tf.keras.layers.Dense(4, activation="softmax")
 
 
     def call(self, input):
+
+        if(self.without_tempo == True):
+            input =input[:,:,:,1:]
+
         out = self.cnn(input)
+        if(self.with_loss==True):
 
-        vec2vec = self.vec2veclayer (out)
+            vec2vec = self.vec2veclayer (out)
+            probs = self.softmax_layer(out)
+            return probs, vec2vec
+
         probs = self.softmax_layer(out)
-
-
-
-        return probs, vec2vec
+        return probs, probs
 
     def loss(self, logits, labels,two_d_vectorspace):
 

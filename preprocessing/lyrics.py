@@ -6,7 +6,7 @@ PAD_TOKEN = "*PAD*"
 STOP_TOKEN = "*STOP*"
 START_TOKEN = "*START*"
 UNK_TOKEN = "*UNK*"
-MAX_SENTENCE_SIZE = 125  # the max length of each sentence/song - feel free to adjust
+MAX_SENTENCE_SIZE = 130  # the max length of each sentence/song - feel free to adjust
 UNK_THRESHOLD = 2  # words showing up less than this threshold will be considered as uncommon words
 
 def read_data(file_name):
